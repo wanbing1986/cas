@@ -5,8 +5,10 @@ import org.apereo.cas.couchbase.core.CouchbaseClientFactory;
 import org.apereo.cas.util.junit.EnabledIfContinuousIntegration;
 
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +33,7 @@ import org.springframework.context.event.EventListener;
     })
 @Tag("Couchbase")
 @EnabledIfContinuousIntegration
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CouchbaseServiceRegistryTests extends AbstractServiceRegistryTests {
 
     @Autowired
@@ -49,7 +52,6 @@ public class CouchbaseServiceRegistryTests extends AbstractServiceRegistryTests 
     @BeforeEach
     @SneakyThrows
     public void clearBucket() {
-        serviceRegistryCouchbaseClientFactory.getBucket().invalidateQueryCache();
         Thread.sleep(500);
     }
 
