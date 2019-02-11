@@ -18,6 +18,9 @@
         <Logger name="org.apereo.cas.services" level="trace" additivity="false">
             <AppenderRef ref="console"/>
         </Logger>
+        <Logger name="com.couchbase" level="trace" additivity="false">
+            <AppenderRef ref="console"/>
+        </Logger>
         <Root level="off">
             <AppenderRef ref="console"/>
         </Root>
