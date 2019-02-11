@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -56,15 +57,16 @@ public class CouchbaseServiceRegistry extends AbstractServiceRegistry implements
     public RegisteredService save(final RegisteredService service) {
         LOGGER.trace("Saving service [{}] [{}]", service.getClass().getName(), service.getName());
         if (service.getId() == AbstractRegisteredService.INITIAL_IDENTIFIER_VALUE) {
-            service.setId(service.hashCode());
+            service.setId(UUID.randomUUID().getLeastSignificantBits());
         }
         val stringWriter = new StringWriter();
         this.registeredServiceJsonSerializer.to(stringWriter, service);
         val document = RawJsonDocument.create(String.valueOf(service.getId()), 0, stringWriter.toString());
-        couchbase.getBucket().upsert(document, couchbase.getTimeout(), TimeUnit.MILLISECONDS);
-        LOGGER.debug("Saved service [{}]", service.getName());
+        val savedDocument= couchbase.getBucket().upsert(document, couchbase.getTimeout(), TimeUnit.MILLISECONDS);
+        val savedService = registeredServiceJsonSerializer.from(savedDocument.content());
+        LOGGER.debug("Saved service [{}] as [{}]", service.getName(), savedService.getName());
         publishEvent(new CouchbaseRegisteredServiceSavedEvent(this));
-        return service;
+        return savedService;
     }
 
     @Override
