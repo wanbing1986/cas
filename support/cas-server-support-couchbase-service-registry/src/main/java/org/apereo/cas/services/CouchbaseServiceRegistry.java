@@ -1,6 +1,7 @@
 package org.apereo.cas.services;
 
 import org.apereo.cas.couchbase.core.CouchbaseClientFactory;
+import org.apereo.cas.couchbase.core.CouchbaseException;
 import org.apereo.cas.support.events.service.CasRegisteredServiceLoadedEvent;
 import org.apereo.cas.util.serialization.StringSerializer;
 
@@ -110,13 +111,15 @@ public class CouchbaseServiceRegistry extends AbstractServiceRegistry implements
 
         val n1q1Query = N1qlQuery.simple(statement);
         val queryResult = theBucket.query(n1q1Query, couchbase.getTimeout(), TimeUnit.MILLISECONDS);
+        if (!queryResult.finalSuccess()) {
+            throw new CouchbaseException(queryResult.status() + ": " + queryResult.errors().toString());
+        }
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("executeViewQueryForAllServices() [");
             queryResult.allRows().forEach(r -> LOGGER.trace("[{}]", r));
             LOGGER.trace("]");
         }
         return queryResult;
-
     }
 
     @Override
